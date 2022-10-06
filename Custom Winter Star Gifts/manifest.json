@@ -5,6 +5,6 @@
   "Description": "Allows you to add to or replace Winter Star gifts via content packs.",
   "UniqueID": "harvz.CWSG",
   "EntryDll": "CWSG.dll",
-  "MinimumApiVersion": "3.5.0",
+  "MinimumApiVersion": "3.15.0",
   "UpdateKeys": [ "Nexus:10024" ]
 }
