@@ -1,4 +1,6 @@
 ﻿
+using System.Diagnostics;
+
 using CWSG.Integrations;
 
 using StardewModdingAPI;
@@ -8,6 +10,8 @@ using StardewValley;
 using SObject = StardewValley.Object;
 
 namespace CWSG.Framework;
+
+[DebuggerDisplay("Name={Name}, Quantity={Quantity}, Type={Type}")]
 public class ItemEntry
 {
     public string? Name { get; set; }

@@ -24,12 +24,17 @@ internal static class UtilityPatches
 
             // need to ensure packs are loaded. Players like screwing with the clock.
             ModEntry.LoadPacks();
+            
+            SortedList<int, Dictionary<ModeEnum, List<ItemEntry>>>? allData = ModEntry.Data.TryGetValue("All", out var allEntries) ? allEntries : null;
+            SortedList<int, Dictionary<ModeEnum, List<ItemEntry>>>? specificData = ModEntry.Data.TryGetValue(who.Name, out var specificEntries) ? specificEntries : null;
+            
 
-            var allData = ModEntry.Data["All"];
-            var specificData = ModEntry.Data[who.Name];
-
-            var relevantKeys = allData.Keys.Concat(specificData.Keys).ToHashSet().OrderByDescending(a => a);
+            List<int>? relevantKeys = Enumerable.Empty<int>().Concat(allData?.Keys ?? Enumerable.Empty<int>())
+                .Concat(specificData?.Keys ?? Enumerable.Empty<int>()).ToHashSet().OrderByDescending(a => a).ToList();
             ModEntry.ModMonitor.Log(string.Join(',', relevantKeys));
+
+            if (relevantKeys.Count == 0)
+                return true; // no data for you.
 
             int allPriority = ModEntry.LowestUsefulPriority.TryGetValue("All", out int val) ? val : int.MaxValue;
             int specificPriority = ModEntry.LowestUsefulPriority.TryGetValue(who.Name, out int val2) ? val2 : int.MaxValue;
@@ -39,9 +44,9 @@ internal static class UtilityPatches
             {
                 // handle minimum entry shortcutting.
                 if (key > allPriority)
-                    allData.Remove(key);
+                    allData?.Remove(key);
                 if (key > specificPriority)
-                    specificData.Remove(key);
+                    specificData?.Remove(key);
                 if (key > minPriority)
                     continue;
 
@@ -51,7 +56,7 @@ internal static class UtilityPatches
                 if (key == minPriority)
                 {
                     // check the specific list first.
-                    if (specificData.TryGetValue(key, out Dictionary<ModeEnum, List<ItemEntry>>? specific))
+                    if (specificData?.TryGetValue(key, out Dictionary<ModeEnum, List<ItemEntry>>? specific) == true)
                     {
                         if (!specific.TryGetValue(ModeEnum.Overwrite, out var itemEntries) || itemEntries.Count <= 0)
                         {
@@ -75,7 +80,7 @@ internal static class UtilityPatches
                     }
 
                     // If nothing was added by the specific, try the all items list.
-                    if (possibleObjects.Count == 0 && allData.TryGetValue(key, out var all))
+                    if (possibleObjects.Count == 0 && allData?.TryGetValue(key, out var all) == true)
                     {
                         if (!all.TryGetValue(ModeEnum.Overwrite, out var itemEntries) || itemEntries.Count <= 0)
                         {
@@ -91,9 +96,13 @@ internal static class UtilityPatches
 
                 // process all data appends.
                 {
-                    if (allData.TryGetValue(key, out var items) && items.TryGetValue(ModeEnum.AddToExisting, out var itemEntries))
+                    if (allData?.TryGetValue(key, out var items)  == true && items.TryGetValue(ModeEnum.AddToExisting, out var itemEntries))
                     {
                         possibleItemEntries.AddRange(itemEntries);
+                    }
+                    if (specificData?.TryGetValue(key, out var specificItems) == true && specificItems.TryGetValue(ModeEnum.AddToExisting, out var itemEntries2))
+                    {
+                        possibleItemEntries.AddRange(itemEntries2);
                     }
                 }
             }
