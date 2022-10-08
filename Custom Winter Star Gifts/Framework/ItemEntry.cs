@@ -44,7 +44,7 @@ internal static class ItemEntryExtensions
         }
     }
 
-    internal static Item? ResolveItemEntry(this ItemEntry entry)
+    internal static Item? Resolve(this ItemEntry entry)
     {
         if (entry.Name is null)
             return null;

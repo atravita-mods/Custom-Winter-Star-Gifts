@@ -70,7 +70,7 @@ internal static class UtilityPatches
                         {
                             foreach (var itemEntry in itemEntries)
                             {
-                                var item = itemEntry.ResolveItemEntry();
+                                var item = itemEntry.Resolve();
                                 if (item is not null)
                                     possibleObjects.Add(item);
                                 else
@@ -109,7 +109,7 @@ internal static class UtilityPatches
 
             foreach (var itemEntry in possibleItemEntries)
             {
-                var item = itemEntry.ResolveItemEntry();
+                var item = itemEntry.Resolve();
                 if (item is not null)
                     possibleObjects.Add(item);
                 else
@@ -120,6 +120,7 @@ internal static class UtilityPatches
             if (possibleObjects.Count > 0)
             {
                 __result = Utility.GetRandom(possibleObjects, r);
+                return false;
             }
         }
         catch (Exception ex)

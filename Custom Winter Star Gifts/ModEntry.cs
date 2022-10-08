@@ -52,13 +52,10 @@ internal sealed class ModEntry : Mod
         helper.ConsoleCommands.Add(
             "cwsg.force_reload",
             "Forces CWSG to reload the packs",
-            (_, _) =>
+            static (_, _) =>
             {
-                this.Monitor.Log("Forcibly reloading packs", LogLevel.Info);
-                Data.Clear();
-                LowestUsefulPriority.Clear();
-                Loaded = false;
-
+                ModMonitor.Log("Forcibly reloading packs", LogLevel.Info);
+                Reset();
                 LoadPacks();
             });
 
@@ -153,7 +150,11 @@ internal sealed class ModEntry : Mod
         AssetManager.Initialize(this.Helper.GameContent);
 
         this.Helper.Events.Content.AssetsInvalidated += static (_, e) => AssetManager.OnAssetInvalidated(e.NamesWithoutLocale);
-        this.Helper.Events.GameLoop.DayEnding += static (_, _) => AssetManager.Reset();
+        this.Helper.Events.GameLoop.DayEnding += static (_, _) =>
+        {
+            AssetManager.Reset();
+            Reset();
+        };
     }
 
     private void OnDayStarted(object? sender, DayStartedEventArgs e)
@@ -165,5 +166,15 @@ internal sealed class ModEntry : Mod
         IDictionary<string, string> festivalDates = Game1.content.Load<Dictionary<string, string>>("Data\\Festivals\\FestivalDates", LocalizedContentManager.LanguageCode.en);
         if (festivalDates.TryGetValue($"{Game1.currentSeason}{Game1.dayOfMonth}", out string? festivalName) && festivalName == "Feast of the Winter Star")
             LoadPacks();
+    }
+
+    /// <summary>
+    /// Clears the data loaded at the end of the day.
+    /// </summary>
+    private static void Reset()
+    {
+        Data.Clear();
+        LowestUsefulPriority.Clear();
+        Loaded = false;
     }
 }
